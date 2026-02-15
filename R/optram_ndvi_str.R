@@ -99,6 +99,16 @@ optram_ndvi_str <- function(STR_list, VI_list,
     df_1 <- dplyr::inner_join(VI_1_df, STR_1_df,
                               by = c("x", "y"), keep = FALSE)
 
+    # Now make sure we are below the max_tbl_size
+    max_size_1 <- max_tbl_size / length(STR_list)
+    if (nrow(df_1) > max_size_1) {
+      # Set sample size as:
+      # maximum table / number of dates in date range
+      samp_size <- max_size_1
+      idx <- sample(nrow(df_1), max_size_1)
+      df_1 <- df_1[idx,]
+    }
+
     # Get date and tileid from file name, and add to data.frame
     date_tile <- unlist(strsplit(gsub(".tif", "", unique_str), "_"))
     # After strsplit:
@@ -131,14 +141,6 @@ optram_ndvi_str <- function(STR_list, VI_list,
   # Remove rows with NA in VI or STR columns
   full_df <- full_df[stats::complete.cases(full_df[3:4]),]
 
-  # Finally, Now make sure we are below the max_tbl_size
-  if (nrow(full_df) > max_tbl_size) {
-    # Set sample size as:
-    # maximum table / number of dates in date range
-    samp_size <- max_tbl_size
-    idx <- sample(nrow(full_df), max_tbl_size)
-    full_df <- full_df[idx,]
-  }
   df_file <- file.path(output_dir, "VI_STR_data.rds")
   saveRDS(full_df, df_file)
   message("Saved: ", nrow(full_df), " rows of VI-STR data to: ", df_file)
