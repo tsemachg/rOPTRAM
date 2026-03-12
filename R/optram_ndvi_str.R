@@ -104,7 +104,6 @@ optram_ndvi_str <- function(STR_list, VI_list,
     if (nrow(df_1) > max_size_1) {
       # Set sample size as:
       # maximum table / number of dates in date range
-      samp_size <- max_size_1
       idx <- sample(nrow(df_1), max_size_1)
       df_1 <- df_1[idx,]
     }
