@@ -8,6 +8,8 @@
 [![Project Status:
 ACTIVE](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ropensci/rOPTRAM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ropensci/rOPTRAM/actions/workflows/R-CMD-check.yaml)
+[![Status at rOpenSci Software Peer
+Review](https://badges.ropensci.org/612_status.svg)](https://github.com/ropensci/software-review/issues/612)
 [![DOI](https://zenodo.org/badge/811356946.svg)](https://zenodo.org/doi/10.5281/zenodo.13257766)
 <!-- badges: end -->
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.07086/status.svg)](https://doi.org/10.21105/joss.07086)
@@ -159,6 +161,7 @@ First, a demonstration of choosing non-default package options.
 ``` r
 # Show default options
 rOPTRAM::optram_options()
+#> [1] "area_cover = 99"
 #> [1] "edge_points = TRUE"
 #> [1] "feature_col = ID"
 #> [1] "max_cloud = 12"
@@ -167,9 +170,12 @@ rOPTRAM::optram_options()
 #> [1] "overwrite = FALSE"
 #> [1] "period = full"
 #> [1] "plot_colors = no"
+#> [1] "porosity = 0.4"
 #> [1] "remote = scihub"
+#> [1] "resolution = 10"
 #> [1] "rm.hi.str = FALSE"
 #> [1] "rm.low.vi = FALSE"
+#> [1] "save_img_list = FALSE"
 #> [1] "scm_mask = TRUE"
 #> [1] "SWIR_band = 11"
 #> [1] "tileid = NA"
