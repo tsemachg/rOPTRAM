@@ -78,11 +78,6 @@ optram_ndvi_str <- function(STR_list, VI_list,
     STR_1_df <- terra::as.data.frame(STR, xy=TRUE, na.rm = FALSE)
     names(STR_1_df) <- c("x", "y", "STR")
 
-    # Add the Feature_ID if it exists
-    if (!is.null(ID_df)) {
-      STR_1_df <- dplyr::inner_join(STR_1_df, ID_df,
-                                    by = c("x", "y"), keep = FALSE)
-    }
     # Also get the vegetation index raster for this date/tileid
     unique_str <- gsub("STR_", "", basename(f))
     VI_f <- VI_list[grep(unique_str, basename(VI_list))]
@@ -98,6 +93,19 @@ optram_ndvi_str <- function(STR_list, VI_list,
     # Join two DF's and keep only sampled number of rows
     df_1 <- dplyr::inner_join(VI_1_df, STR_1_df,
                               by = c("x", "y"), keep = FALSE)
+    # Remove low VI values
+    if (rm.low.vi) {
+      # Apply rm.low.vi parameter, set VI to NA when values <= 0.005
+      df_1$VI[df_1$VI <= 0.005]  <- NA
+    }
+    # Add the Feature_ID if it exists
+    if (!is.null(ID_df)) {
+      STR_1_df <- dplyr::inner_join(STR_1_df, ID_df,
+                                    by = c("x", "y"), keep = FALSE)
+    }
+
+    # Remove rows with NA in VI or STR columns
+    df_1 <- df_1[stats::complete.cases(df_1[3:4]),]
 
     # Now make sure we are below the max_tbl_size
     max_size_1 <- max_tbl_size / length(STR_list)
@@ -122,22 +130,19 @@ optram_ndvi_str <- function(STR_list, VI_list,
   })
   full_df <- do.call(rbind, df_list)
 
-  # Now, with all df_list merged into one, remove high STR values
+  # Now, remove high STR values
+  # This has to be outside the lapply loop in oder to use the whole DF
+  # to calculate quartiles
   if (rm.hi.str) {
     # Calculate inter quartile range, and set all STR values
     # above (1.5 * IQR) to NA
     # message("Applying rm.hi.str")
-    STR_q3 <- stats::quantile(full_df$STR, probs = 0.75, na.rm = TRUE)
+    Q3 <- stats::quantile(full_df$STR, probs = 0.75, na.rm = TRUE)
     STR_IQR <- stats::IQR(full_df$STR, na.rm = TRUE)
-    cutoff <- STR_q3 + 1.5 * STR_IQR
+    cutoff <- Q3 + 1.5 * STR_IQR
     full_df$STR[full_df$STR >= cutoff] <- NA
   }
-  # and also low VI values
-  if (rm.low.vi) {
-    # Apply rm.low.vi parameter, set VI to NA when values <= 0.005
-    full_df$VI[full_df$VI <= 0.005]  <- NA
-  }
-  # Remove rows with NA in VI or STR columns
+  # and Remove those rows
   full_df <- full_df[stats::complete.cases(full_df[3:4]),]
 
   df_file <- file.path(output_dir, "VI_STR_data.rds")
